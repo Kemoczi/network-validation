@@ -4,7 +4,7 @@ def main() -> None:
     try:
         print(get_file_response("show interfaces status gi1-10"))
         print(get_file_response("show interfaces status gi1-5"))
-        print(get_file_response("Lodedede"))
+        print(get_file_response("Lodededeee"))
     except ValueError as exc:
         print(exc)
 
