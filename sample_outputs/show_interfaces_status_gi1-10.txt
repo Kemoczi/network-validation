@@ -1,0 +1,24 @@
+Port  Name                 Status      Vlan  Duplex  Speed    Type
+gi1                        connected   1     a-full  a-1000M  Copper
+gi2                        connected   1     a-full  a-1000M  Copper
+gi3                        connected   1     a-full  a-1000M  Copper
+gi4                        connected   1     a-full  a-1000M  Copper
+gi5                        connected   1     a-full  a-1000M  Copper
+gi6                        notconnect  1     auto    auto     Copper
+gi7                        notconnect  1     auto    auto     Copper
+gi8                        notconnect  1     auto    auto     Copper
+gi9                        notconnect  1     auto    auto     Fiber
+gi10                       notconnect  1     auto    auto     Fiber
+
+Port Time Range                       Status
+---- -------------------------------- --------
+gi1
+gi2
+gi3
+gi4
+gi5
+gi6
+gi7
+gi8
+gi9
+gi10
