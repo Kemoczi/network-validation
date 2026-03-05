@@ -1,9 +1,14 @@
 ''' Get command - if correct - return file content, else - throw exception '''
 from pathlib import Path
 
-def get_file_response(cmd):
+def parse_cmd_to_filename(cmd: str) -> str:
+    parsed = cmd.replace(" ", "_")
+    return parsed
+
+def get_file_response(cmd: str) -> str:
     if cmd == "show interfaces status gi1-10":
-        file = Path("sample_outputs/show_interfaces_status_gi1-10.txt")
+        filename = parse_cmd_to_filename(cmd)
+        file = Path(f"sample_outputs/{filename}.txt")
         with file.open() as f:
             return f.read()
     elif cmd == "show interfaces status gi1-5":
