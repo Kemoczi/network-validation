@@ -11,7 +11,5 @@ def get_file_response(cmd: str) -> str:
         file = Path(f"sample_outputs/{filename}.txt")
         with file.open() as f:
             return f.read()
-    elif cmd == "show interfaces status gi1-5":
-        return "Not yet implemented"
     else:
         raise ValueError(f"Unknown command: {cmd}")
