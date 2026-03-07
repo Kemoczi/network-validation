@@ -1,17 +1,14 @@
 from validators.basic import check_port_info
+import sys
 
 def main(port) -> None:
     try:
         port_info = check_port_info(port)
-        if port_info["Status"] == "connected":
-            print(f"Port gi{port} is open.")
-        elif port_info["Status"] == "notconnect":
-            print(f"Port gi{port} is closed.")
-        else:
-            print(f"Port gi{port} status is unknown.")
 
         print(
-            f"Port details:\n"
+            f"Port gi{port} details:\n"
+            f"Status: {port_info['Status']}\n"
+            f"Name: {port_info['Name']}\n"
             f"VLAN: {port_info['Vlan']}\n"
             f"Duplex: {port_info['Duplex']}\n"
             f"Speed: {port_info['Speed']}\n"
@@ -21,4 +18,7 @@ def main(port) -> None:
         print("Error: ", exc)
 
 if __name__ == "__main__":
-    main("dddd")
+    try:
+        main(sys.argv[1])
+    except IndexError:
+        print("Error: You must provide a port number")

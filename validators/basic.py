@@ -7,28 +7,36 @@ def get_resp_lines(response: str) -> list[str]:
     for line in lines:
         if line == "":
             break
-        column_items = line.split()
-        lines_table.append(column_items)
+        lines_table.append(line)
     return lines_table
 
 
 def get_port_line(port: str, resp_lines: list[str]) -> str:
     for line in resp_lines:
-        if line[0] == port:
+        if line.startswith(port):
             return line
     return "Port not found"
 
 
 def parse_port_line(resp_lines: list[str]) -> dict[str, int]:
-    port_index = resp_lines[0].index("Port")
-    # name_index = resp_lines[0].index("Name")
-    # TODO: figure out what about names, now subtracting -1 from index
-    status_index = resp_lines[0].index("Status") - 1
-    vlan_index = resp_lines[0].index("Vlan") - 1
-    duplex_index = resp_lines[0].index("Duplex") - 1
-    speed_index = resp_lines[0].index("Speed") - 1
-    type_index = resp_lines[0].index("Type") - 1
-    columns = {"Port": port_index, "Status": status_index, "Vlan": vlan_index, "Duplex": duplex_index, "Speed": speed_index, "Type": type_index}
+    header = resp_lines[0]
+    port_index = header.find("Port")
+    name_index = header.find("Name")
+    status_index = header.find("Status")
+    vlan_index = header.find("Vlan")
+    duplex_index = header.find("Duplex")
+    speed_index = header.find("Speed")
+    type_index = header.find("Type")
+
+    columns = {
+        "Port": port_index,
+        "Name": name_index,
+        "Status": status_index,
+        "Vlan": vlan_index,
+        "Duplex": duplex_index,
+        "Speed": speed_index,
+        "Type": type_index
+    }
 
     return columns
 
@@ -41,12 +49,13 @@ def get_port_info(port: int) -> dict[str, str]:
     fields = parse_port_line(resp_lines)
 
     info = {
-        "Port": port_line[fields["Port"]],
-        "Status": port_line[fields["Status"]],
-        "Vlan": port_line[fields["Vlan"]],
-        "Duplex": port_line[fields["Duplex"]],
-        "Speed": port_line[fields["Speed"]],
-        "Type": port_line[fields["Type"]]
+        "Port": port_line[fields["Port"]:fields["Name"]].strip(),
+        "Name": port_line[fields["Name"]:fields["Status"]].strip(),
+        "Status": port_line[fields["Status"]:fields["Vlan"]].strip(),
+        "Vlan": port_line[fields["Vlan"]:fields["Duplex"]].strip(),
+        "Duplex": port_line[fields["Duplex"]:fields["Speed"]].strip(),
+        "Speed": port_line[fields["Speed"]:fields["Type"]].strip(),
+        "Type": port_line[fields["Type"]:len(port_line)]
     }
     return info
 

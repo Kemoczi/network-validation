@@ -2,7 +2,7 @@
 from pathlib import Path
 
 def parse_cmd_to_filename(cmd: str) -> str:
-    parsed = cmd.replace(" ", "_")
+    parsed = str.lower(cmd).replace(" ", "_")
     return parsed
 
 def get_file_response(cmd: str) -> str:
