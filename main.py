@@ -1,24 +1,24 @@
-from clients.file_client import get_file_response
-from validators.basic import check_port_state
+from validators.basic import check_port_info
 
-def get_port_state(port: int) -> str | None:
+def main(port) -> None:
     try:
-        response = get_file_response("show interfaces status gi1-10")
-        port = int(port)
-        port_state = check_port_state(port, response)
+        port_info = check_port_info(port)
+        if port_info["Status"] == "connected":
+            print(f"Port gi{port} is open.")
+        elif port_info["Status"] == "notconnect":
+            print(f"Port gi{port} is closed.")
+        else:
+            print(f"Port gi{port} status is unknown.")
 
-        if port_state == "connected":
-            return f"Port gi{port} is connected"
-        elif port_state == "not connected":
-            return f"Port gi{port} is not connected"
+        print(
+            f"Port details:\n"
+            f"VLAN: {port_info['Vlan']}\n"
+            f"Duplex: {port_info['Duplex']}\n"
+            f"Speed: {port_info['Speed']}\n"
+            f"Type: {port_info['Type']}\n"
+        )
     except ValueError as exc:
-        return f"Invalid port: {port}. {exc}"
-
-def main() -> None:
-    port = 7
-    port_state = get_port_state(port)
-
-    print(port_state)
+        print("Error: ", exc)
 
 if __name__ == "__main__":
-    main()
+    main("dddd")
