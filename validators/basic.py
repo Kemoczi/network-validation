@@ -58,17 +58,3 @@ def get_port_info(port: int) -> dict[str, str]:
         "Type": port_line[fields["Type"]:len(port_line)]
     }
     return info
-
-def check_port_info(port: int) -> dict[str, str] | str:
-    try:
-        port_num = int(port)
-        if not (1 <= port_num <= 10) or len(str(port)) > 2 or str(port).startswith("0"):
-            raise ValueError(f"Port number must be integer 1-10, got: {port}.")
-        else:
-            info = get_port_info(port_num)
-            return info
-    except ValueError:
-        raise ValueError(f"Port number must be integer 1-10, got: {port}.")
-
-
-
