@@ -14,7 +14,7 @@ def main(port) -> None:
             f"Speed: {port_info['Speed']}\n"
             f"Type: {port_info['Type']}\n"
         )
-    except ValueError as exc:
+    except TypeError as exc:
         print("Error: ", exc)
 
 if __name__ == "__main__":
@@ -22,3 +22,5 @@ if __name__ == "__main__":
         main(sys.argv[1])
     except IndexError:
         print("Error: You must provide a port number")
+    except ValueError as exc:
+        print("Error: ", exc)

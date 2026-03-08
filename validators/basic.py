@@ -11,11 +11,11 @@ def get_resp_lines(response: str) -> list[str]:
     return lines_table
 
 
-def get_port_line(port: str, resp_lines: list[str]) -> str:
+def get_port_line(port: str, resp_lines: list[str]) -> str | None:
     for line in resp_lines:
-        if line.startswith(port):
+        if line[0:4].strip() == port:
             return line
-    return "Port not found"
+    raise ValueError(f"{port} not found in response")
 
 
 def parse_port_line(resp_lines: list[str]) -> dict[str, int]:
@@ -59,13 +59,16 @@ def get_port_info(port: int) -> dict[str, str]:
     }
     return info
 
-def check_port_info(port: int) -> dict[str, str]:
+def check_port_info(port: int) -> dict[str, str] | str:
     try:
         port_num = int(port)
-    except:
-        raise ValueError(f"Port number must be integer, got: {port}.")
-    if 1 <= port_num <= 10:
-        info = get_port_info(port_num)
-        return info
-    else:
+        if not (1 <= port_num <= 10) or len(str(port)) > 2 or str(port).startswith("0"):
+            raise ValueError(f"Port number must be integer 1-10, got: {port}.")
+        else:
+            info = get_port_info(port_num)
+            return info
+    except ValueError:
         raise ValueError(f"Port number must be integer 1-10, got: {port}.")
+
+
+
