@@ -1,0 +1,15 @@
+CBS220:
+     hostname: 192.168.0.12
+     groups:
+       - main
+     data:
+       site: Olesnica
+       role: switch
+
+ExampleDevice:
+     hostname: 127.0.0.1
+     groups:
+       - main
+     data:
+       site: Wroclaw
+       role: router
