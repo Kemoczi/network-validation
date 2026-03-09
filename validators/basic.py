@@ -1,4 +1,4 @@
-from clients.file_client import get_file_response
+from errors import PortNotFoundError, ResponseFormatError
 
 
 def get_resp_lines(response: str) -> list[str]:
@@ -8,6 +8,9 @@ def get_resp_lines(response: str) -> list[str]:
         if line == "":
             break
         lines_table.append(line)
+    if not lines_table:
+        raise ResponseFormatError("Response is empty or table section was not found.")
+
     return lines_table
 
 
@@ -15,7 +18,7 @@ def get_port_line(port: str, resp_lines: list[str]) -> str | None:
     for line in resp_lines:
         if line[0:4].strip() == port:
             return line
-    raise ValueError(f"{port} not found in response")
+    raise PortNotFoundError(f"{port} not found in response")
 
 
 def parse_port_line(resp_lines: list[str]) -> dict[str, int]:
@@ -38,12 +41,17 @@ def parse_port_line(resp_lines: list[str]) -> dict[str, int]:
         "Type": type_index
     }
 
+    missing_columns = [name for name, index in columns.items() if index == -1]
+    if missing_columns:
+        raise ResponseFormatError(
+            f"Missing expected columns in response header: {', '.join(missing_columns)}"
+        )
+
     return columns
 
 
-def get_port_info(port: int) -> dict[str, str]:
+def get_port_info(port: int, response: str) -> dict[str, str]:
     port_name = f"gi{port}"
-    response = get_file_response("show interfaces status gi1-10")
     resp_lines = get_resp_lines(response)
     port_line = get_port_line(port_name, resp_lines)
     fields = parse_port_line(resp_lines)

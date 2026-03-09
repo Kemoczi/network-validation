@@ -1,16 +1,28 @@
 from pathlib import Path
+from errors import ResponseReadError, UnknownCommandError
 
+SUPPORTED_COMMANDS = {
+    "show interfaces status gi1-10": "show_interfaces_status_gi1-10.txt",
+}
 
-def get_file_response(cmd: str) -> str:
-    filename = str.lower(cmd).replace(" ", "_")
-    if cmd == "show interfaces status gi1-10":
-        try:
-            file = Path(f"sample_outputs/{filename}.txt")
-            with file.open(encoding='utf-8') as f:
-                return f.read()
-        except FileNotFoundError as exc:
-            return exc
-        except OSError as exc:
-            return exc
-    else:
-        raise ValueError(f"Unknown command: {cmd}")
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+SAMPLE_OUTPUTS_DIR = PROJECT_ROOT / "sample_outputs"
+
+def get_response(cmd: str) -> str:
+    filename = SUPPORTED_COMMANDS.get(cmd)
+    if filename is None:
+        raise UnknownCommandError(f"Unsupported command: {cmd}")
+
+    file_path = SAMPLE_OUTPUTS_DIR / filename
+
+    try:
+        with file_path.open(encoding="utf-8") as file:
+            return file.read()
+    except FileNotFoundError as exc:
+        raise ResponseReadError(
+            f"Sample output file not found for command '{cmd}': {file_path}"
+        ) from exc
+    except OSError as exc:
+        raise ResponseReadError(
+            f"Could not read sample output file for command '{cmd}': {file_path}"
+        ) from exc
