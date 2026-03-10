@@ -12,6 +12,8 @@ examples:
 `python main.py file 1`
 `python main.py switch 1`
 
+Nornir (online only, needs config):
+`python nornir_runner.py`
 
 ### TESTING:
 
