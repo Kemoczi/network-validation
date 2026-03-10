@@ -65,4 +65,5 @@ def get_port_info(port: int, response: str) -> dict[str, str]:
         "Speed": port_line[fields["Speed"]:fields["Type"]].strip(),
         "Type": port_line[fields["Type"]:len(port_line)]
     }
+
     return info
