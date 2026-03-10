@@ -5,11 +5,12 @@
 
 
 ### Basic usage
-`python main.py <port_number(1-10)> <mode(file/switch)>`
+`python main.py <mode(file/switch)> <port_number(1-10)>`
 
-example:
+examples:
 
-`python main.py 1 switch`
+`python main.py file 1`
+`python main.py switch 1`
 
 
 ### TESTING:
