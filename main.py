@@ -25,7 +25,7 @@ def parse_port_arg(port_raw: str) -> int:
 
     return port_num
 
-COMMAND = "show interfacess status gi1-10"
+COMMAND = "show interfaces status gi1-10"
 def main(mode: str, port_raw: str) -> None:
     port_num = parse_port_arg(port_raw)
     mode = mode.lower().strip()
