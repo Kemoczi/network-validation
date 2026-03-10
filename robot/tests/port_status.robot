@@ -14,9 +14,11 @@ Port 10 Should Be Not Connected Offline
     Should Be Equal    ${status}    notconnect
 
 Port 1 Should Be Connected Online
+    [Tags]    online
     ${status}=    Get Port Status    1    switch
     Should Be Equal    ${status}    connected
 
 Port 10 Should Be Not Connected Online
+    [Tags]    online
     ${status}=    Get Port Status    10    switch
     Should Be Equal    ${status}    notconnect
