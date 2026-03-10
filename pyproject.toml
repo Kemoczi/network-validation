@@ -1,0 +1,4 @@
+[tool.pytest.ini_options]
+markers = [
+    "offline: tests that not require physical switch"
+]

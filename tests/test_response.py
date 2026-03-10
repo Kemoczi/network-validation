@@ -26,7 +26,7 @@ PORT_DATA = [
     (10, "notconnect")
 ]
 
-
+@pytest.mark.offline
 @pytest.mark.parametrize('port, status', PORT_DATA)
 def test_status_offline(port, file_response, status):
     assert validator.get_port_info(port, file_response)["Status"] == status
@@ -36,7 +36,7 @@ def test_status_offline(port, file_response, status):
 def test_status_online(port, switch_response, status):
     assert validator.get_port_info(port, switch_response)["Status"] == status
 
-
+@pytest.mark.offline
 @pytest.mark.parametrize('port', [11, 12, 13])
 def test_wrong_port_offline(port, file_response):
     with pytest.raises(PortNotFoundError, match="not found"):

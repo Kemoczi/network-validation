@@ -1,14 +1,15 @@
 *** Settings ***
 Library    ../keywords/port_keywords.py
-
 *** Variables ***
 
 *** Test Cases ***
 Port 1 Should Be Connected Offline
+    [Tags]    offline
     ${status}=    Get Port Status    1    file
     Should Be Equal    ${status}    connected
 
 Port 10 Should Be Not Connected Offline
+    [Tags]    offline
     ${status}=    Get Port Status    10    file
     Should Be Equal    ${status}    notconnect
 
