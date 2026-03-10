@@ -1,6 +1,5 @@
 *** Settings ***
 Library    ../keywords/port_keywords.py
-*** Variables ***
 
 *** Test Cases ***
 Port 1 Should Be Connected Offline
