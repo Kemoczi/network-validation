@@ -1,7 +1,7 @@
 from validators.basic import get_port_info
 from clients import file_client, netmiko_client
 
-__all__ = ["get_port_status"]
+# __all__ = ["get_port_status"] Not needed here - there's only one function
 
 def get_port_status(port: int, mode: str) -> str:
     if mode == "file":
