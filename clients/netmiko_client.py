@@ -1,8 +1,10 @@
 import os
+from typing import Any
+
 from dotenv import load_dotenv
 from netmiko import ConnectHandler
 from errors import ResponseReadError
-from netmiko.exceptions import ReadTimeout
+from netmiko.exceptions import ReadTimeout, NetmikoTimeoutException
 
 
 def get_switch_config():
@@ -32,12 +34,12 @@ SWITCH_CONFIG = {
 }
 
 
-def get_response(cmd:str) -> str:
+def get_response(cmd: str) -> str | list[Any] | dict[str, Any]:
     connection = None
     try:
         connection = ConnectHandler(**SWITCH_CONFIG)
         return connection.send_command(cmd)
-    except ReadTimeout as exc:
+    except NetmikoTimeoutException as exc:
         raise ResponseReadError(f"Timed out while reading response for command: {cmd}") from exc
     finally:
         if connection is not None:
