@@ -33,11 +33,33 @@ def count_traffic(port: int, t: int)-> tuple[int, int]:
     return mb_in, mb_out
 
 
+def get_snapshot() -> list[dict]:
+    if_count = 0
+    all_ifs = switch.get("1.3.6.1.2.1.2.1.0")[0].value.value
+    for i in range(1, all_ifs):
+        type = switch.get(f"1.3.6.1.2.1.2.2.1.3.{i}")
+        try:
+            _ = type[0].value.value
+            if_count += 1
+        except AttributeError:
+            continue
+
+
+    for i in range(1, if_count + 1):
+        alias = switch.get(f"1.3.6.1.2.1.31.1.1.1.18.{i}")
+        if alias[0].value.data != b'':
+            print(alias[0].value.data.decode('utf-8'))
+        else:
+            print(switch.get(f"1.3.6.1.2.1.2.2.1.2.{i}")[0].value.data.decode('utf-8'))
+
+
 if __name__ == "__main__":
-    PORT = 4
+    PORT = 5
     TIME_S = 50
 
-    data = count_traffic(PORT, TIME_S)
+    get_snapshot()
 
-    print(f"MB In: {data[0]}")
-    print(f"MB Out: {data[1]}")
+    # data = count_traffic(PORT, TIME_S)
+    #
+    # print(f"MB In: {data[0]}")
+    # print(f"MB Out: {data[1]}")
