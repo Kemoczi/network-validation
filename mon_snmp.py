@@ -27,17 +27,17 @@ def count_traffic(port: int, t: int)-> tuple[int, int]:
     delta_in = end_in - start_in
     delta_out = end_out - start_out
 
-    mbps_in = delta_in * 8 / t / 1_000_000
-    mbps_out = delta_out * 8 / t / 1_000_000
+    mb_in = delta_in / 1_000_000
+    mb_out = delta_out / 1_000_000
 
-    return mbps_in, mbps_out
+    return mb_in, mb_out
 
 
 if __name__ == "__main__":
-    PORT = 2
-    TIME_S = 10
+    PORT = 4
+    TIME_S = 50
 
     data = count_traffic(PORT, TIME_S)
 
-    print(f"In: {data[0]}")
-    print(f"Out: {data[1]}")
+    print(f"MB In: {data[0]}")
+    print(f"MB Out: {data[1]}")
