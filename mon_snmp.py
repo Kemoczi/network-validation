@@ -33,9 +33,10 @@ def count_traffic(port: int, t: int)-> tuple[int, int]:
     return mb_in, mb_out
 
 
-def get_snapshot() -> list[dict]:
-    if_count = 0
+def get_if_count() -> int:
     all_ifs = switch.get("1.3.6.1.2.1.2.1.0")[0].value.value
+    if_count = 0
+
     for i in range(1, all_ifs):
         type = switch.get(f"1.3.6.1.2.1.2.2.1.3.{i}")
         try:
@@ -43,9 +44,15 @@ def get_snapshot() -> list[dict]:
             if_count += 1
         except AttributeError:
             continue
+    return if_count
 
 
-    for i in range(1, if_count + 1):
+def get_snapshot() -> list[dict]:
+
+    rows = []
+    row = {"Name": ''}
+
+    for i in range(1, get_if_count() + 1):
         alias = switch.get(f"1.3.6.1.2.1.31.1.1.1.18.{i}")
         if alias[0].value.data != b'':
             print(alias[0].value.data.decode('utf-8'))
