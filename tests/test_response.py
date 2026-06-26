@@ -23,7 +23,7 @@ PORT_DATA = [
     (3, "connected"),
     (4, "connected"),
     (5, "connected"),
-    (6, "notconnect"),
+    (6, "connected"),
     (7, "notconnect"),
     (8, "notconnect"),
     (9, "notconnect"),

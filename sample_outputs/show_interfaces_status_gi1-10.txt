@@ -4,7 +4,7 @@ gi2                        connected   1     a-full  a-1000M  Copper
 gi3                        connected   1     a-full  a-1000M  Copper
 gi4                        connected   1     a-full  a-1000M  Copper
 gi5                        connected   1     a-full  a-1000M  Copper
-gi6                        notconnect  1     auto    auto     Copper
+gi6                        connected   1     auto    auto     Copper
 gi7                        notconnect  1     auto    auto     Copper
 gi8                        notconnect  1     auto    auto     Copper
 gi9                        notconnect  1     auto    auto     Fiber
