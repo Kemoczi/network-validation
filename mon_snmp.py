@@ -15,17 +15,17 @@ def countdown(t: int) -> None:
 
 
 def count_traffic(port: int, t: int)-> tuple[int, int]:
-    smtp_mb_in = f"1.3.6.1.2.1.31.1.1.1.6.{port}"
-    smtp_mb_out = f"1.3.6.1.2.1.31.1.1.1.10.{port}"
+    snmp_oct_in = f"1.3.6.1.2.1.31.1.1.1.6.{port}"
+    snmp_oct_out = f"1.3.6.1.2.1.31.1.1.1.10.{port}"
 
-    start_in = switch.get(smtp_mb_in)[0].value.value
-    start_out = switch.get(smtp_mb_out)[0].value.value
+    start_in = switch.get(snmp_oct_in)[0].value.value
+    start_out = switch.get(snmp_oct_out)[0].value.value
 
     print(f"\nGathering traffic on port {port} for {t} seconds, please wait...\n")
     countdown(t)
 
-    end_in = switch.get(smtp_mb_in)[0].value.value
-    end_out = switch.get(smtp_mb_out)[0].value.value
+    end_in = switch.get(snmp_oct_in)[0].value.value
+    end_out = switch.get(snmp_oct_out)[0].value.value
 
     delta_in = end_in - start_in
     delta_out = end_out - start_out
