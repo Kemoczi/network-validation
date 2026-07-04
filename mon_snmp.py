@@ -14,7 +14,7 @@ def countdown(t: int) -> None:
     print("\r", end='', flush=True)
 
 
-def count_traffic(port: int, t: int)-> tuple[int, int]:
+def count_traffic(port: int, t: int = 1)-> tuple[int, int]:
     snmp_oct_in = f"1.3.6.1.2.1.31.1.1.1.6.{port}"
     snmp_oct_out = f"1.3.6.1.2.1.31.1.1.1.10.{port}"
 
@@ -67,6 +67,7 @@ def get_oper_status(port: int) -> str:
     else:
         return "DOWN"
 
+
 def create_table(rows: list[dict]) -> str:
     headers = ["Port", "Name", "Status"]
 
@@ -108,7 +109,13 @@ def get_snapshot() -> None:
     if_count = get_if_count()
 
     for i in range(1, if_count + 1):
-        rows.append({"port": i, "name": get_alias(i), "status": get_oper_status(i)})
+        rows.append(
+            {
+                "port": i,
+                "name": get_alias(i),
+                "status": get_oper_status(i)
+            }
+        )
 
     print(create_table(rows))
 
