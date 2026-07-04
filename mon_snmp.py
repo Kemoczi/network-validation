@@ -67,14 +67,50 @@ def get_oper_status(port: int) -> str:
     else:
         return "DOWN"
 
+def create_table(rows: list[dict]) -> str:
+    headers = ["Port", "Name", "Status"]
 
-def get_snapshot() -> list[dict]:
+    table_rows = []
+    for row in rows:
+        table_rows.append([
+            str(row["port"]),
+            str(row["name"]),
+            str(row["status"])
+        ])
+
+    widths = []
+    for i, header in enumerate(headers):
+        max_width = len(header)
+        for row in table_rows:
+            max_width = max(max_width, len(row[i]))
+        widths.append(max_width)
+
+    def format_row(values: list[str]) -> str:
+        return " | ".join(
+            value.ljust(width) for value, width in zip(values, widths)
+        )
+
+    separator = "-+-".join("-" * width for width in widths)
+
+    lines = [
+        format_row(headers),
+        separator,
+    ]
+
+    for row in table_rows:
+        lines.append(format_row(row))
+
+    return "\n".join(lines)
+
+
+def get_snapshot() -> None:
     rows = []
-    row = {"Name": ''}
     if_count = get_if_count()
 
     for i in range(1, if_count + 1):
-        print(get_alias(i), get_oper_status(i))
+        rows.append({"port": i, "name": get_alias(i), "status": get_oper_status(i)})
+
+    print(create_table(rows))
 
 
 if __name__ == "__main__":
