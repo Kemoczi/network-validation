@@ -50,26 +50,40 @@ def get_if_count() -> int:
     return if_count
 
 
-def get_snapshot() -> list[dict]:
+def get_alias(port: int) -> str:
+    alias = switch.get(f"1.3.6.1.2.1.31.1.1.1.18.{port}")
+    if alias[0].value.data != b'':
+        return alias[0].value.data.decode('utf-8')
+    # if no alias, fall back to if generic name
+    else:
+        return switch.get(f"1.3.6.1.2.1.2.2.1.2.{port}")[0].value.data.decode('utf-8')
 
+
+def get_oper_status(port: int) -> str:
+    oper_status = switch.get(f"1.3.6.1.2.1.2.2.1.8.{port}")
+
+    if (oper_status[0].value.value == 1):
+        return "UP"
+    else:
+        return "DOWN"
+
+
+def get_snapshot() -> list[dict]:
     rows = []
     row = {"Name": ''}
+    if_count = get_if_count()
 
-    for i in range(1, get_if_count() + 1):
-        alias = switch.get(f"1.3.6.1.2.1.31.1.1.1.18.{i}")
-        if alias[0].value.data != b'':
-            print(alias[0].value.data.decode('utf-8'))
-        else:
-            print(switch.get(f"1.3.6.1.2.1.2.2.1.2.{i}")[0].value.data.decode('utf-8'))
+    for i in range(1, if_count + 1):
+        print(get_alias(i), get_oper_status(i))
 
 
 if __name__ == "__main__":
     PORT = 5
     TIME_S = 20
 
-    # get_snapshot()
+    get_snapshot()
 
-    data = count_traffic(PORT, TIME_S)
-
-    print(f"MB In: {data[0]}")
-    print(f"MB Out: {data[1]}")
+    # data = count_traffic(PORT, TIME_S)
+    #
+    # print(f"MB In: {data[0]}")
+    # print(f"MB Out: {data[1]}")
