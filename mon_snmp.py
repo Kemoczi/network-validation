@@ -70,18 +70,22 @@ def get_alias(if_count: int) -> list[str]:
 def get_oper_status(if_count: int) -> list[str]:
     oper_status_oid = "1.3.6.1.2.1.2.2.1.8."
 
-    oper_status = [switch.get(oper_status_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
+    oper_status = [switch.get(oper_status_oid + str(port)) for port in range(1, if_count + 1)]
 
-    oper_status_parsed = ["UP" if status  == 1 else "DOWN" for status in oper_status]
+    # oper_status_parsed = ["UP" if status  == 1 else "DOWN" for status in oper_status]
+    # return oper_status_parsed
+    oper_status_parsed = []
+
+    for status in oper_status:
+        match status[0].value.value:
+            case 1:
+                oper_status_parsed.append("UP")
+            case 2:
+                oper_status_parsed.append("DOWN")
+            case _:
+                oper_status_parsed.append("UNKNOWN")
+
     return oper_status_parsed
-
-    # match oper_status[0].value.value:
-    #     case 1:
-    #         return "UP"
-    #     case 2:
-    #         return "DOWN"
-    #     case _:
-    #         return "UNKNOWN"
 
 
 def get_errors(if_count: int) -> tuple[list[int], list[int]]:
@@ -148,6 +152,13 @@ def get_snapshot(if_count: int) -> str:
     speeds = get_speed(if_count)
     errors_in = get_errors(if_count)[0]
     errors_out = get_errors(if_count)[1]
+
+    print(ports)
+    print(names)
+    print(statuses)
+    print(speeds)
+    print(errors_in)
+    print(errors_out)
 
     # for i in range(1, if_count + 1):
     #     rows.append(
