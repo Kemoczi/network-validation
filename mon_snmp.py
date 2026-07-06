@@ -50,36 +50,69 @@ def get_if_count() -> int:
     return if_count
 
 
-def get_alias(port: int) -> str:
-    alias = switch.get(f"1.3.6.1.2.1.31.1.1.1.18.{port}")
-    if alias[0].value.data != b'':
-        return alias[0].value.data.decode('utf-8')
+def get_alias(if_count: int) -> list[str]:
+    aliases = []
+
+    for port in range(1, if_count + 1):
+        alias = switch.get(f"1.3.6.1.2.1.31.1.1.1.18.{port}")
+        if alias[0].value.data != b'':
+            aliases.append(alias[0].value.data.decode('utf-8'))
     # if no alias, fall back to if generic name
-    else:
-        return switch.get(f"1.3.6.1.2.1.2.2.1.2.{port}")[0].value.data.decode('utf-8')
+        else:
+           aliases.append(
+               switch.get(f"1.3.6.1.2.1.2.2.1.2.{port}")[0]
+               .value.data.decode('utf-8')
+           )
+
+    return aliases
 
 
-def get_oper_status(port: int) -> str:
-    oper_status = switch.get(f"1.3.6.1.2.1.2.2.1.8.{port}")
+def get_oper_status(if_count: int) -> list[str]:
+    oper_status_oid = "1.3.6.1.2.1.2.2.1.8."
 
-    match oper_status[0].value.value:
-        case 1:
-            return "UP"
-        case 2:
-            return "DOWN"
-        case _:
-            return "UNKNOWN"
+    oper_status = [switch.get(oper_status_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
 
+    oper_status_parsed = ["UP" if status  == 1 else "DOWN" for status in oper_status]
+    return oper_status_parsed
+
+    # match oper_status[0].value.value:
+    #     case 1:
+    #         return "UP"
+    #     case 2:
+    #         return "DOWN"
+    #     case _:
+    #         return "UNKNOWN"
+
+
+def get_errors(if_count: int) -> tuple[list[int], list[int]]:
+    errors_in_oid = "1.3.6.1.2.1.2.2.1.14."
+    errors_out_oid = "1.3.6.1.2.1.2.2.1.20."
+
+    errors_in = [switch.get(errors_in_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
+    errors_out = [switch.get(errors_out_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
+
+    return errors_in, errors_out
+
+
+def get_speed(if_count: int) -> list[int]:
+    speed_oid = "1.3.6.1.2.1.2.2.1.5."
+    speeds = [switch.get(speed_oid + str(port)) for port in range(1, if_count + 1)]
+    speeds_parsed = [int(speed[0].value.value / 1_000_000) for speed in speeds]
+
+    return speeds_parsed
 
 def create_table(rows: list[dict]) -> str:
-    headers = ["Port", "Name", "Status"]
+    headers = ["Port", "Name", "Status", "Max speed [Mbps]", "In Errors", "Out Errors"]
 
     table_rows = []
     for row in rows:
         table_rows.append([
             str(row["port"]),
             str(row["name"]),
-            str(row["status"])
+            str(row["status"]),
+            str(row["speed"]),
+            str(row["errors_in"]),
+            str(row["errors_out"])
         ])
 
     widths = []
@@ -107,27 +140,37 @@ def create_table(rows: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def get_snapshot() -> None:
+def get_snapshot(if_count: int) -> str:
     rows = []
-    if_count = get_if_count()
+    ports = [i for i in range(1, if_count + 1)]
+    names = get_alias(if_count)
+    statuses = get_oper_status(if_count)
+    speeds = get_speed(if_count)
+    errors_in = get_errors(if_count)[0]
+    errors_out = get_errors(if_count)[1]
 
-    for i in range(1, if_count + 1):
-        rows.append(
-            {
-                "port": i,
-                "name": get_alias(i),
-                "status": get_oper_status(i)
-            }
-        )
-
-    print(create_table(rows))
+    # for i in range(1, if_count + 1):
+    #     rows.append(
+    #         {
+    #             "port": i,
+    #             "name": get_alias(i),
+    #             "status": get_oper_status(i),
+    #             "speed": get_speed(i),
+    #             "errors_in": get_errors(i)[0],
+    #             "errors_out": get_errors(i)[1]
+    #         }
+    #     )
+    #
+    # return create_table(rows)
 
 
 if __name__ == "__main__":
     PORT = 5
     TIME_S = 20
 
-    get_snapshot()
+    print(
+        get_snapshot(get_if_count())
+        )
 
     # data = count_traffic(PORT, TIME_S)
     #
