@@ -62,10 +62,13 @@ def get_alias(port: int) -> str:
 def get_oper_status(port: int) -> str:
     oper_status = switch.get(f"1.3.6.1.2.1.2.2.1.8.{port}")
 
-    if (oper_status[0].value.value == 1):
-        return "UP"
-    else:
-        return "DOWN"
+    match oper_status[0].value.value:
+        case 1:
+            return "UP"
+        case 2:
+            return "DOWN"
+        case _:
+            return "UNKNOWN"
 
 
 def create_table(rows: list[dict]) -> str:
