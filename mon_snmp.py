@@ -1,6 +1,5 @@
 import time
 from snmp import Engine, SNMPv2c
-from timeit import default_timer as timer
 
 engine = Engine(SNMPv2c)
 
@@ -105,6 +104,7 @@ def get_speed(if_count: int) -> list[int]:
 
     return speeds
 
+
 def create_table(rows: list[dict]) -> str:
     headers = ["Port", "Name", "Status", "Max speed [Mbps]", "In Errors", "Out Errors"]
 
@@ -167,12 +167,7 @@ def get_snapshot(if_count: int) -> str:
 
 
 if __name__ == "__main__":
-    start = timer()
 
     print(
         get_snapshot(get_if_count())
         )
-
-    end = timer()
-
-    print(end - start)
