@@ -69,11 +69,8 @@ def get_alias(if_count: int) -> list[str]:
 
 def get_oper_status(if_count: int) -> list[str]:
     oper_status_oid = "1.3.6.1.2.1.2.2.1.8."
-
     oper_status = [switch.get(oper_status_oid + str(port)) for port in range(1, if_count + 1)]
 
-    # oper_status_parsed = ["UP" if status  == 1 else "DOWN" for status in oper_status]
-    # return oper_status_parsed
     oper_status_parsed = []
 
     for status in oper_status:
@@ -160,6 +157,7 @@ def get_snapshot(if_count: int) -> str:
                 "speed": speeds[if_idx],
                 "errors_in": errors_in[if_idx],
                 "errors_out": errors_out[if_idx]
+                #TODO add mb_in and out for periodic snapshot monitoring
             }
         )
 
