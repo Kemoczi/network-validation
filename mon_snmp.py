@@ -15,7 +15,7 @@ def countdown(t: int) -> None:
     print("\r", end='', flush=True)
 
 
-def count_traffic(port: int, t: int = 1)-> tuple[int, int]:
+def count_traffic(port: int, t: int = 1)-> tuple[float, float]:
     snmp_oct_in = f"1.3.6.1.2.1.31.1.1.1.6.{port}"
     snmp_oct_out = f"1.3.6.1.2.1.31.1.1.1.10.{port}"
 
@@ -42,9 +42,9 @@ def get_if_count() -> int:
     if_count = 0
 
     for i in range(1, all_ifs):
-        type = switch.get(f"1.3.6.1.2.1.2.2.1.3.{i}")
+        if_type = switch.get(f"1.3.6.1.2.1.2.2.1.3.{i}")
         try:
-            _ = type[0].value.value
+            _ = if_type[0].value.value
             if_count += 1
         except AttributeError:
             continue
@@ -100,11 +100,10 @@ def get_errors(if_count: int) -> tuple[list[int], list[int]]:
 
 
 def get_speed(if_count: int) -> list[int]:
-    speed_oid = "1.3.6.1.2.1.2.2.1.5."
-    speeds = [switch.get(speed_oid + str(port)) for port in range(1, if_count + 1)]
-    speeds_parsed = [int(speed[0].value.value / 1_000_000) for speed in speeds]
+    speed_oid = "1.3.6.1.2.1.31.1.1.1.15."
+    speeds = [switch.get(speed_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
 
-    return speeds_parsed
+    return speeds
 
 def create_table(rows: list[dict]) -> str:
     headers = ["Port", "Name", "Status", "Max speed [Mbps]", "In Errors", "Out Errors"]
@@ -147,22 +146,20 @@ def create_table(rows: list[dict]) -> str:
 
 def get_snapshot(if_count: int) -> str:
     rows = []
-    ports = [i for i in range(1, if_count + 1)]
     names = get_alias(if_count)
     statuses = get_oper_status(if_count)
     speeds = get_speed(if_count)
-    errors_in = get_errors(if_count)[0]
-    errors_out = get_errors(if_count)[1]
+    errors_in, errors_out = get_errors(if_count)
 
-    for port in range(0, if_count):
+    for if_idx in range(0, if_count):
         rows.append(
             {
-                "port": ports[port],
-                "name": names[port],
-                "status": statuses[port],
-                "speed": speeds[port],
-                "errors_in": errors_in[port],
-                "errors_out": errors_out[port]
+                "port": if_idx + 1,
+                "name": names[if_idx],
+                "status": statuses[if_idx],
+                "speed": speeds[if_idx],
+                "errors_in": errors_in[if_idx],
+                "errors_out": errors_out[if_idx]
             }
         )
 
