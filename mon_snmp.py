@@ -1,4 +1,6 @@
 import time
+from typing import Any
+
 from snmp import Engine, SNMPv2c
 
 engine = Engine(SNMPv2c)
@@ -14,26 +16,22 @@ def countdown(t: int) -> None:
     print("\r", end='', flush=True)
 
 
-def count_traffic(port: int, t: int = 1)-> tuple[float, float]:
-    snmp_oct_in = f"1.3.6.1.2.1.31.1.1.1.6.{port}"
-    snmp_oct_out = f"1.3.6.1.2.1.31.1.1.1.10.{port}"
+def get_traffic(if_count: int)-> tuple[list[Any], list[Any]]:
+    snmp_oct_in_oid = "1.3.6.1.2.1.31.1.1.1.6."
+    snmp_oct_out_oid = "1.3.6.1.2.1.31.1.1.1.10."
 
-    start_in = switch.get(snmp_oct_in)[0].value.value
-    start_out = switch.get(snmp_oct_out)[0].value.value
+    mb_in_start = [switch.get(snmp_oct_in_oid + str(port))[0].value.value / 1_000_000 for port in range(1, if_count + 1)]
+    mb_out_start = [switch.get(snmp_oct_out_oid + str(port))[0].value.value / 1_000_000 for port in range(1, if_count + 1)]
 
-    print(f"\nGathering traffic on port {port} for {t} seconds, please wait...\n")
-    countdown(t)
+    mb_in_end = [switch.get(snmp_oct_in_oid + str(port))[0].value.value / 1_000_000 for port in
+                   range(1, if_count + 1)]
+    mb_out_end = [switch.get(snmp_oct_out_oid + str(port))[0].value.value / 1_000_000 for port in
+                    range(1, if_count + 1)]
 
-    end_in = switch.get(snmp_oct_in)[0].value.value
-    end_out = switch.get(snmp_oct_out)[0].value.value
+    delta_in = [mb_in_end[i] - mb_in_start[i] for i in range(if_count)]
+    delta_out = [mb_out_end[i] - mb_out_start[i] for i in range(if_count)]
 
-    delta_in = end_in - start_in
-    delta_out = end_out - start_out
-
-    mb_in = delta_in / 1_000_000
-    mb_out = delta_out / 1_000_000
-
-    return mb_in, mb_out
+    return delta_in, delta_out
 
 
 def get_if_count() -> int:
@@ -103,7 +101,7 @@ def get_speed(if_count: int) -> list[int]:
 
 
 def create_table(rows: list[dict]) -> str:
-    headers = ["Port", "Name", "Status", "Max speed [Mbps]", "In Errors", "Out Errors"]
+    headers = ["Port", "Name", "Status", "Max speed [Mbps]", "In Errors", "Out Errors", "MB in", "MB out"]
 
     table_rows = []
     for row in rows:
@@ -113,7 +111,9 @@ def create_table(rows: list[dict]) -> str:
             str(row["status"]),
             str(row["speed"]),
             str(row["errors_in"]),
-            str(row["errors_out"])
+            str(row["errors_out"]),
+            str(row["mb_in"]),
+            str(row["mb_out"]),
         ])
 
     widths = []
@@ -147,6 +147,7 @@ def get_snapshot(if_count: int) -> str:
     statuses = get_oper_status(if_count)
     speeds = get_speed(if_count)
     errors_in, errors_out = get_errors(if_count)
+    mb_in, mb_out = get_traffic(if_count)
 
     for if_idx in range(0, if_count):
         rows.append(
@@ -156,8 +157,10 @@ def get_snapshot(if_count: int) -> str:
                 "status": statuses[if_idx],
                 "speed": speeds[if_idx],
                 "errors_in": errors_in[if_idx],
-                "errors_out": errors_out[if_idx]
-                #TODO add mb_in and out for periodic snapshot monitoring
+                "errors_out": errors_out[if_idx],
+                "mb_in": mb_in[if_idx],
+                "mb_out": mb_out[if_idx]
+                #TODO fix mb_in and out for periodic traffic monitoring
             }
         )
 
