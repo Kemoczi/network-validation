@@ -1,5 +1,6 @@
 import time
 from snmp import Engine, SNMPv2c
+from timeit import default_timer as timer
 
 engine = Engine(SNMPv2c)
 
@@ -153,37 +154,28 @@ def get_snapshot(if_count: int) -> str:
     errors_in = get_errors(if_count)[0]
     errors_out = get_errors(if_count)[1]
 
-    print(ports)
-    print(names)
-    print(statuses)
-    print(speeds)
-    print(errors_in)
-    print(errors_out)
+    for port in range(0, if_count):
+        rows.append(
+            {
+                "port": ports[port],
+                "name": names[port],
+                "status": statuses[port],
+                "speed": speeds[port],
+                "errors_in": errors_in[port],
+                "errors_out": errors_out[port]
+            }
+        )
 
-    # for i in range(1, if_count + 1):
-    #     rows.append(
-    #         {
-    #             "port": i,
-    #             "name": get_alias(i),
-    #             "status": get_oper_status(i),
-    #             "speed": get_speed(i),
-    #             "errors_in": get_errors(i)[0],
-    #             "errors_out": get_errors(i)[1]
-    #         }
-    #     )
-    #
-    # return create_table(rows)
+    return create_table(rows)
 
 
 if __name__ == "__main__":
-    PORT = 5
-    TIME_S = 20
+    start = timer()
 
     print(
         get_snapshot(get_if_count())
         )
 
-    # data = count_traffic(PORT, TIME_S)
-    #
-    # print(f"MB In: {data[0]}")
-    # print(f"MB Out: {data[1]}")
+    end = timer()
+
+    print(end - start)
