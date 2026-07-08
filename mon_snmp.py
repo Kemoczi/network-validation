@@ -15,7 +15,6 @@ def countdown(t: int) -> None:
         print(f"\rNext snapshot in: {t} seconds [Ctrl+C to exit]", end='', flush=True)
         time.sleep(1)
         t -= 1
-    print("\r", end='', flush=True)
 
 
 def get_traffic(if_count: int)-> tuple[list[Any], list[Any]]:
@@ -125,6 +124,7 @@ def create_table(rows: list[dict]) -> str:
     separator = "-+-".join("-" * width for width in widths)
 
     lines = [
+        "SNMP Monitor v.0.1 by Kemoczi\n",
         format_row(headers),
         separator,
     ]
@@ -132,7 +132,7 @@ def create_table(rows: list[dict]) -> str:
     for row in table_rows:
         lines.append(format_row(row))
 
-    return "\n".join(lines)
+    return "\n".join(lines) + "\n"
 
 
 def get_snapshot(if_count: int, interval: int) -> list[Any]:
