@@ -107,7 +107,7 @@ def get_speed(if_count: int) -> list[int]:
 
 
 def create_table(rows: list[dict]) -> str:
-    headers = ["Port", "Name", "Status", "Max speed [Mbps]", "In Errors", "Out Errors", "kBps in", "kBps out"]
+    headers = ["Port", "Name", "Status", "Max speed [Mbps]", "In Errors", "Out Errors", "kB/s in", "kB/s out"]
 
     table_rows = []
     for row in rows:
