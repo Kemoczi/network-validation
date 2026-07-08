@@ -166,8 +166,8 @@ def get_snapshot(if_count: int) -> str:
                 "speed": speeds[if_idx],
                 "errors_in": errors_in[if_idx],
                 "errors_out": errors_out[if_idx],
-                "kb_in": f"{kb_in[if_idx]:.2f}",
-                "kb_out": f"{kb_out[if_idx]:.2f}"
+                "kb_in": f"{kb_in[if_idx]:.3f}",
+                "kb_out": f"{kb_out[if_idx]:.3f}"
             }
         )
 
