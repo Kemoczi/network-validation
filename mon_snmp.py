@@ -23,7 +23,7 @@ def get_traffic(if_count: int)-> tuple[list[Any], list[Any]]:
     kb_in_start = [switch.get(snmp_oct_in_oid + str(port))[0].value.value / 1_000 for port in range(1, if_count + 1)]
     kb_out_start = [switch.get(snmp_oct_out_oid + str(port))[0].value.value / 1_000 for port in range(1, if_count + 1)]
 
-    countdown(1)
+    countdown(5)
 
     kb_in_end = [switch.get(snmp_oct_in_oid + str(port))[0].value.value / 1_000 for port in
                    range(1, if_count + 1)]
