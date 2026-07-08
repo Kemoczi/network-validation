@@ -23,8 +23,6 @@ def get_traffic(if_count: int)-> tuple[list[Any], list[Any]]:
     kb_in_start = [switch.get(snmp_oct_in_oid + str(port))[0].value.value / 1_000 for port in range(1, if_count + 1)]
     kb_out_start = [switch.get(snmp_oct_out_oid + str(port))[0].value.value / 1_000 for port in range(1, if_count + 1)]
 
-    countdown(5)
-
     kb_in_end = [switch.get(snmp_oct_in_oid + str(port))[0].value.value / 1_000 for port in
                    range(1, if_count + 1)]
     kb_out_end = [switch.get(snmp_oct_out_oid + str(port))[0].value.value / 1_000 for port in
@@ -33,7 +31,7 @@ def get_traffic(if_count: int)-> tuple[list[Any], list[Any]]:
     delta_in = [kb_in_end[i] - kb_in_start[i] for i in range(if_count)]
     delta_out = [kb_out_end[i] - kb_out_start[i] for i in range(if_count)]
 
-    return delta_in, delta_out
+    return kb_in_start, kb_out_start
 
 
 def get_if_count() -> int:
@@ -98,7 +96,7 @@ def get_errors(if_count: int) -> tuple[list[int], list[int]]:
     errors_in = [errors_in_end[i] - errors_in_start[i] for i in range(if_count)]
     errors_out = [errors_out_end[i] - errors_out_start[i] for i in range(if_count)]
 
-    return errors_in, errors_out
+    return errors_in_start, errors_out_start
 
 
 def get_speed(if_count: int) -> list[int]:
@@ -109,7 +107,7 @@ def get_speed(if_count: int) -> list[int]:
 
 
 def create_table(rows: list[dict]) -> str:
-    headers = ["Port", "Name", "Status", "Max speed [Mbps]", "In Errors", "Out Errors", "kB in", "kB out"]
+    headers = ["Port", "Name", "Status", "Max speed [Mbps]", "In Errors", "Out Errors", "kBps in", "kBps out"]
 
     table_rows = []
     for row in rows:
@@ -120,8 +118,8 @@ def create_table(rows: list[dict]) -> str:
             str(row["speed"]),
             str(row["errors_in"]),
             str(row["errors_out"]),
-            str(row["kb_in"]),
-            str(row["kb_out"]),
+            str(row["kbps_in"]),
+            str(row["kbps_out"]),
         ])
 
     widths = []
@@ -149,13 +147,24 @@ def create_table(rows: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def get_snapshot(if_count: int) -> str:
+def get_snapshot(if_count: int, interval: int) -> str:
     rows = []
     names = get_alias(if_count)
     statuses = get_oper_status(if_count)
     speeds = get_speed(if_count)
-    errors_in, errors_out = get_errors(if_count)
-    kb_in, kb_out = get_traffic(if_count)
+
+    errors_in_start, errors_out_start = get_errors(if_count)
+    kb_in_start, kb_out_start = get_traffic(if_count)
+
+    countdown(interval)
+
+    errors_in_end, errors_out_end = get_errors(if_count)
+    kb_in_end, kb_out_end = get_traffic(if_count)
+
+    errors_in = [errors_in_end[i] - errors_in_start[i] for i in range(if_count)]
+    errors_out = [errors_out_end[i] - errors_out_start[i] for i in range(if_count)]
+    kb_in = [(kb_in_end[i] - kb_in_start[i]) / interval for i in range(if_count)]
+    kb_out = [(kb_out_end[i] - kb_out_start[i]) / interval for i in range(if_count)]
 
     for if_idx in range(0, if_count):
         rows.append(
@@ -166,8 +175,8 @@ def get_snapshot(if_count: int) -> str:
                 "speed": speeds[if_idx],
                 "errors_in": errors_in[if_idx],
                 "errors_out": errors_out[if_idx],
-                "kb_in": f"{kb_in[if_idx]:.3f}",
-                "kb_out": f"{kb_out[if_idx]:.3f}"
+                "kbps_in": f"{kb_in[if_idx]:.3f}",
+                "kbps_out": f"{kb_out[if_idx]:.3f}"
             }
         )
 
@@ -177,5 +186,5 @@ def get_snapshot(if_count: int) -> str:
 if __name__ == "__main__":
 
     print(
-        get_snapshot(get_if_count())
+        get_snapshot(get_if_count(), 10)
         )
