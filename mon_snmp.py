@@ -1,4 +1,6 @@
 import time
+import subprocess
+import sys
 from typing import Any
 
 from snmp import Engine, SNMPv2c
@@ -10,7 +12,7 @@ switch = engine.Manager("192.168.0.12", community=b"monitoring")
 
 def countdown(t: int) -> None:
     while t:
-        print(f"\r{t}", end='', flush=True)
+        print(f"\rNext snapshot in: {t} seconds [Ctrl+C to exit]", end='', flush=True)
         time.sleep(1)
         t -= 1
     print("\r", end='', flush=True)
@@ -20,18 +22,10 @@ def get_traffic(if_count: int)-> tuple[list[Any], list[Any]]:
     snmp_oct_in_oid = "1.3.6.1.2.1.31.1.1.1.6."
     snmp_oct_out_oid = "1.3.6.1.2.1.31.1.1.1.10."
 
-    kb_in_start = [switch.get(snmp_oct_in_oid + str(port))[0].value.value / 1_000 for port in range(1, if_count + 1)]
-    kb_out_start = [switch.get(snmp_oct_out_oid + str(port))[0].value.value / 1_000 for port in range(1, if_count + 1)]
+    kb_in = [switch.get(snmp_oct_in_oid + str(port))[0].value.value / 1_000 for port in range(1, if_count + 1)]
+    kb_out = [switch.get(snmp_oct_out_oid + str(port))[0].value.value / 1_000 for port in range(1, if_count + 1)]
 
-    kb_in_end = [switch.get(snmp_oct_in_oid + str(port))[0].value.value / 1_000 for port in
-                   range(1, if_count + 1)]
-    kb_out_end = [switch.get(snmp_oct_out_oid + str(port))[0].value.value / 1_000 for port in
-                    range(1, if_count + 1)]
-
-    delta_in = [kb_in_end[i] - kb_in_start[i] for i in range(if_count)]
-    delta_out = [kb_out_end[i] - kb_out_start[i] for i in range(if_count)]
-
-    return kb_in_start, kb_out_start
+    return kb_in, kb_out
 
 
 def get_if_count() -> int:
@@ -87,16 +81,10 @@ def get_errors(if_count: int) -> tuple[list[int], list[int]]:
     errors_in_oid = "1.3.6.1.2.1.2.2.1.14."
     errors_out_oid = "1.3.6.1.2.1.2.2.1.20."
 
-    errors_in_start = [switch.get(errors_in_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
-    errors_out_start = [switch.get(errors_out_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
+    errors_in = [switch.get(errors_in_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
+    errors_out = [switch.get(errors_out_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
 
-    errors_in_end = [switch.get(errors_in_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
-    errors_out_end = [switch.get(errors_out_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
-
-    errors_in = [errors_in_end[i] - errors_in_start[i] for i in range(if_count)]
-    errors_out = [errors_out_end[i] - errors_out_start[i] for i in range(if_count)]
-
-    return errors_in_start, errors_out_start
+    return errors_in, errors_out
 
 
 def get_speed(if_count: int) -> list[int]:
@@ -147,7 +135,7 @@ def create_table(rows: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def get_snapshot(if_count: int, interval: int) -> str:
+def get_snapshot(if_count: int, interval: int) -> list[Any]:
     rows = []
     names = get_alias(if_count)
     statuses = get_oper_status(if_count)
@@ -180,11 +168,22 @@ def get_snapshot(if_count: int, interval: int) -> str:
             }
         )
 
-    return create_table(rows)
+    return rows
+
+def monitor_loop(if_count:int, interval: int):
+
+    rows = get_snapshot(if_count, interval)
+    subprocess.run("cls", shell=True)
+    print(create_table(rows))
+
 
 
 if __name__ == "__main__":
+    if_count = get_if_count()
 
-    print(
-        get_snapshot(get_if_count(), 10)
-        )
+    while True:
+        try:
+            monitor_loop(if_count, 10)
+        except KeyboardInterrupt:
+            print("\nMonitor stopped")
+            sys.exit(0)
