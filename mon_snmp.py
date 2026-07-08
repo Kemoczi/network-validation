@@ -17,7 +17,7 @@ def countdown(t: int) -> None:
         t -= 1
 
 
-def get_traffic(if_count: int)-> tuple[list[Any], list[Any]]:
+def get_traffic(if_count: int)-> tuple[list[float], list[float]]:
     snmp_oct_in_oid = "1.3.6.1.2.1.31.1.1.1.6."
     snmp_oct_out_oid = "1.3.6.1.2.1.31.1.1.1.10."
 
@@ -135,7 +135,7 @@ def create_table(rows: list[dict]) -> str:
     return "\n".join(lines) + "\n"
 
 
-def get_snapshot(if_count: int, interval: int) -> list[Any]:
+def get_snapshot(if_count: int, interval: int) -> list[dict]:
     rows = []
     names = get_alias(if_count)
     statuses = get_oper_status(if_count)
@@ -171,18 +171,18 @@ def get_snapshot(if_count: int, interval: int) -> list[Any]:
     return rows
 
 
-def monitor_loop(if_count:int, interval: int):
+def monitor_loop(if_count:int, interval: int) -> None:
     rows = get_snapshot(if_count, interval)
     subprocess.run("cls", shell=True)
     print(create_table(rows))
 
 
 if __name__ == "__main__":
-    if_count = get_if_count()
+    port_count = get_if_count()
 
     while True:
         try:
-            monitor_loop(if_count, 10)
+            monitor_loop(port_count, 10)
         except KeyboardInterrupt:
             print("\nMonitor stopped")
             sys.exit(0)
