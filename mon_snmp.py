@@ -20,16 +20,18 @@ def get_traffic(if_count: int)-> tuple[list[Any], list[Any]]:
     snmp_oct_in_oid = "1.3.6.1.2.1.31.1.1.1.6."
     snmp_oct_out_oid = "1.3.6.1.2.1.31.1.1.1.10."
 
-    mb_in_start = [switch.get(snmp_oct_in_oid + str(port))[0].value.value / 1_000_000 for port in range(1, if_count + 1)]
-    mb_out_start = [switch.get(snmp_oct_out_oid + str(port))[0].value.value / 1_000_000 for port in range(1, if_count + 1)]
+    kb_in_start = [switch.get(snmp_oct_in_oid + str(port))[0].value.value / 1_000 for port in range(1, if_count + 1)]
+    kb_out_start = [switch.get(snmp_oct_out_oid + str(port))[0].value.value / 1_000 for port in range(1, if_count + 1)]
 
-    mb_in_end = [switch.get(snmp_oct_in_oid + str(port))[0].value.value / 1_000_000 for port in
+    countdown(1)
+
+    kb_in_end = [switch.get(snmp_oct_in_oid + str(port))[0].value.value / 1_000 for port in
                    range(1, if_count + 1)]
-    mb_out_end = [switch.get(snmp_oct_out_oid + str(port))[0].value.value / 1_000_000 for port in
+    kb_out_end = [switch.get(snmp_oct_out_oid + str(port))[0].value.value / 1_000 for port in
                     range(1, if_count + 1)]
 
-    delta_in = [mb_in_end[i] - mb_in_start[i] for i in range(if_count)]
-    delta_out = [mb_out_end[i] - mb_out_start[i] for i in range(if_count)]
+    delta_in = [kb_in_end[i] - kb_in_start[i] for i in range(if_count)]
+    delta_out = [kb_out_end[i] - kb_out_start[i] for i in range(if_count)]
 
     return delta_in, delta_out
 
@@ -87,8 +89,14 @@ def get_errors(if_count: int) -> tuple[list[int], list[int]]:
     errors_in_oid = "1.3.6.1.2.1.2.2.1.14."
     errors_out_oid = "1.3.6.1.2.1.2.2.1.20."
 
-    errors_in = [switch.get(errors_in_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
-    errors_out = [switch.get(errors_out_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
+    errors_in_start = [switch.get(errors_in_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
+    errors_out_start = [switch.get(errors_out_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
+
+    errors_in_end = [switch.get(errors_in_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
+    errors_out_end = [switch.get(errors_out_oid + str(port))[0].value.value for port in range(1, if_count + 1)]
+
+    errors_in = [errors_in_end[i] - errors_in_start[i] for i in range(if_count)]
+    errors_out = [errors_out_end[i] - errors_out_start[i] for i in range(if_count)]
 
     return errors_in, errors_out
 
@@ -101,7 +109,7 @@ def get_speed(if_count: int) -> list[int]:
 
 
 def create_table(rows: list[dict]) -> str:
-    headers = ["Port", "Name", "Status", "Max speed [Mbps]", "In Errors", "Out Errors", "MB in", "MB out"]
+    headers = ["Port", "Name", "Status", "Max speed [Mbps]", "In Errors", "Out Errors", "kB in", "kB out"]
 
     table_rows = []
     for row in rows:
@@ -112,8 +120,8 @@ def create_table(rows: list[dict]) -> str:
             str(row["speed"]),
             str(row["errors_in"]),
             str(row["errors_out"]),
-            str(row["mb_in"]),
-            str(row["mb_out"]),
+            str(row["kb_in"]),
+            str(row["kb_out"]),
         ])
 
     widths = []
@@ -147,7 +155,7 @@ def get_snapshot(if_count: int) -> str:
     statuses = get_oper_status(if_count)
     speeds = get_speed(if_count)
     errors_in, errors_out = get_errors(if_count)
-    mb_in, mb_out = get_traffic(if_count)
+    kb_in, kb_out = get_traffic(if_count)
 
     for if_idx in range(0, if_count):
         rows.append(
@@ -158,9 +166,8 @@ def get_snapshot(if_count: int) -> str:
                 "speed": speeds[if_idx],
                 "errors_in": errors_in[if_idx],
                 "errors_out": errors_out[if_idx],
-                "mb_in": mb_in[if_idx],
-                "mb_out": mb_out[if_idx]
-                #TODO fix mb_in and out for periodic traffic monitoring
+                "kb_in": f"{kb_in[if_idx]:.2f}",
+                "kb_out": f"{kb_out[if_idx]:.2f}"
             }
         )
 
