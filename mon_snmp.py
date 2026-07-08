@@ -170,12 +170,12 @@ def get_snapshot(if_count: int, interval: int) -> list[Any]:
 
     return rows
 
+
 def monitor_loop(if_count:int, interval: int):
 
     rows = get_snapshot(if_count, interval)
     subprocess.run("cls", shell=True)
     print(create_table(rows))
-
 
 
 if __name__ == "__main__":
