@@ -1,7 +1,6 @@
 import time
 import subprocess
 import sys
-from typing import Any
 
 from snmp import Engine, SNMPv2c
 
@@ -94,7 +93,7 @@ def get_speed(if_count: int) -> list[int]:
 
 
 def create_table(rows: list[dict]) -> str:
-    headers = ["Port", "Name", "Status", "Max speed [Mbps]", "In Errors", "Out Errors", "kB/s in", "kB/s out"]
+    headers = ["Port", "Name", "Status", "kB/s in", "kB/s out", "Max speed [Mbps]", "In Errors", "Out Errors"]
 
     table_rows = []
     for row in rows:
@@ -102,11 +101,11 @@ def create_table(rows: list[dict]) -> str:
             str(row["port"]),
             str(row["name"]),
             str(row["status"]),
-            str(row["speed"]),
-            str(row["errors_in"]),
-            str(row["errors_out"]),
             str(row["kbps_in"]),
             str(row["kbps_out"]),
+            str(row["speed"]),
+            str(row["errors_in"]),
+            str(row["errors_out"])
         ])
 
     widths = []
@@ -160,11 +159,11 @@ def get_snapshot(if_count: int, interval: int) -> list[dict]:
                 "port": if_idx + 1,
                 "name": names[if_idx],
                 "status": statuses[if_idx],
+                "kbps_in": f"{kb_in[if_idx]:.3f}",
+                "kbps_out": f"{kb_out[if_idx]:.3f}",
                 "speed": speeds[if_idx],
                 "errors_in": errors_in[if_idx],
-                "errors_out": errors_out[if_idx],
-                "kbps_in": f"{kb_in[if_idx]:.3f}",
-                "kbps_out": f"{kb_out[if_idx]:.3f}"
+                "errors_out": errors_out[if_idx]         
             }
         )
 
@@ -173,7 +172,12 @@ def get_snapshot(if_count: int, interval: int) -> list[dict]:
 
 def monitor_loop(if_count:int, interval: int) -> None:
     rows = get_snapshot(if_count, interval)
-    subprocess.run("cls", shell=True)
+
+    if sys.platform == "win32":
+        subprocess.run("cls", shell=True)
+    else:
+        subprocess.run("clear", shell=True)
+
     print(create_table(rows))
 
 
@@ -182,7 +186,7 @@ if __name__ == "__main__":
 
     while True:
         try:
-            monitor_loop(port_count, 10)
+            monitor_loop(port_count, 5)
         except KeyboardInterrupt:
             print("\nMonitor stopped")
             sys.exit(0)
